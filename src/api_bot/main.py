@@ -1,11 +1,7 @@
 import json
-import logging
-
-import openai
 
 from api_bot.chat import Chat
 from api_bot.agent import Agent
-
 
 class ApiSelector:
     chat: Chat
@@ -34,18 +30,11 @@ class ApiSelector:
 
 
 def start_api_selector(
-        openai_key: str,
         openapi_json: str | None = None,
         base_url="http://0.0.0.0:8000",
-        verbose: bool = False,
-        model_name: str = "gpt-3.5-turbo"
+        model_name: str = "anthropic.claude-v2"
     ) -> callable:
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.ERROR)
 
-    openai.api_key = openai_key
     api_selector = ApiSelector(base_url=base_url, openapi_json_path=openapi_json, model_name=model_name)
     api_selector.start()
     ask_question = api_selector.ask_question

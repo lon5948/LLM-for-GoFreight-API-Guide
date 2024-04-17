@@ -1,66 +1,47 @@
-import logging
-import openai
-
-logger = logging.getLogger(__name__)
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain_community.llms import Bedrock
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferMemory
+from langchain.prompts.prompt import PromptTemplate
 
 class Chat:
     _messages = []
     def __init__(
         self,
-        system_message: str = "You are a helpful AI assistant",
-        starting_state: list[str] = None,
-        model_name: str = "gpt-3.5-turbo",
-        stop: list[str] | None = None,
+        system_prompt: str = "You are a helpful AI assistant",
+        model_name: str = "anthropic.claude-v2",
+        region_name: str = "us-west-2",
     ):
-        if starting_state:
-            self._messages = starting_state
-        else:
-            self._messages.append({
-                "role": "system",
-                "content": system_message
-            })
-        self.total_tokens = 0
-        self.model_name = model_name
-        self.stop = stop
-        
-    def _construct_request(self, messages):
-        req = {
-            "model": self.model_name,
-            "messages": messages
-        }
-        return req
-    
-    def _send_req(self, args):
-        kwargs = {
-            "temperature": 0.5,
-        }
-        if self.stop:
-            kwargs["stop"] = self.stop
-        return openai.ChatCompletion.create(
-            **args,
-            **kwargs
+        model = Bedrock(
+            credentials_profile_name="bedrock-admin",
+            model_id=model_name,
+            region_name=region_name,
+            callbacks=[StreamingStdOutCallbackHandler()],
         )
+        
+        template = system_prompt + \
+        """
+            Current conversation:
+            {history}
+        
+            Human: {input}
+            AI Assistant:
+        """
+        
+        prompt = PromptTemplate.from_template(template=template)
+        prompt = prompt.partial(ref="{{ref}}", username="{{username}}")
+        
+        self.conversation = ConversationChain(
+            prompt=prompt, 
+            llm=model, 
+            verbose=True, 
+            memory=ConversationBufferMemory(ai_prefix="AI Assistant"),
+        )
+
+    def _send_req(self, req):
+        resp = self.conversation.predict(input=req)
+        return resp
     
     def user_message(self, text: str):
-        self._messages.append(
-            {
-                "role": "user",
-                "content": text
-            }
-        )
-        request = self._construct_request(self._messages)
-        resp = self._send_req(request)
-        message = resp["choices"][0]["message"]
-        role = message["role"]
-        content = message["content"]
-        
-        self._messages.append({
-            "role": role,
-            "content": content
-        })
-        self.total_tokens += resp["usage"]["total_tokens"]
-        logger.debug(f"Tokens for this request: {resp['usage']['total_tokens']}")
-        logger.debug(f"Total tokens used: {self.total_tokens}")
-        logger.debug(f"Question: {text}")
-        logger.debug(f"Answer: {content}")
-        return content
+        resp = self._send_req(text)
+        return resp

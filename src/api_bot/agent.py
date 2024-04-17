@@ -1,10 +1,8 @@
-import json
 import os
 
 from api_bot.openapi_parser import OpenApiParser, OpenApiParts
 from api_bot.chat import Chat
 from api_bot.engine import ProcessingEngine
-
 
 class Agent():
     chat: Chat
@@ -20,13 +18,8 @@ class Agent():
         openapi_parts = OpenApiParser(openapi).parse()
 
         system_prompt = self.get_system_prompt(openapi_parts)
-        start_prompt = self.get_start_prompt()
-
-        starting_state = [
-            {"role": "system", "content": system_prompt},
-            *start_prompt
-        ]
-        chat = Chat(starting_state=starting_state, model_name=self.model_name)
+        
+        chat = Chat(system_prompt=system_prompt)
         engine = ProcessingEngine(chat=chat, base_url=self.base_url)
         self.chat = chat
         self.engine = engine
@@ -51,13 +44,6 @@ class Agent():
             security_definitions = security_definitions
         )
         return system_prompt
-
-    def get_start_prompt(self) -> dict:
-        start_prompt = {}
-        dirname = os.path.dirname(__file__)
-        with open(dirname + "/../prompt/start_prompt.json", "r") as f:
-            start_prompt = json.loads(f.read())
-        return start_prompt
     
     def ask(self, question):
         return self.engine.ask(question)
