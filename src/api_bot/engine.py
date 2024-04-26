@@ -10,6 +10,5 @@ class ProcessingEngine:
         self.base_url = base_url
         
     def ask(self, question) -> str:
-        inp = f"Base URL is {self.base_url} and teach user how to finish user query according to API documentation.\nUser Query: {question}"
-        response: str = self.chat.user_message(inp)
+        response: str = self.chat.user_message(question)
         return response

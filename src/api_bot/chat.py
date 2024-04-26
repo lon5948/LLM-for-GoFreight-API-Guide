@@ -8,7 +8,7 @@ class Chat:
     _messages = []
     def __init__(
         self,
-        system_prompt: str = "You are a helpful AI assistant",
+        stage1_prompt: str = "You are a helpful AI assistant",
         model_name: str = "anthropic.claude-v2",
         region_name: str = "us-west-2",
     ):
@@ -19,7 +19,7 @@ class Chat:
             callbacks=[StreamingStdOutCallbackHandler()],
         )
         
-        template = system_prompt + \
+        template = stage1_prompt + \
         """
             Current conversation:
             {history}
