@@ -2,6 +2,7 @@
 
 LLM-for-GoFreight-API-Guide is an innovative tool designed to simplify the way developers interact with API documentation. It harnesses the power of LLM to provide users with intuitive guidance on using their APIs effectively. By feeding the `openapi.json` file into this tool, developers can obtain clear instructions on how to execute API calls, understand the functionality of various endpoints, and troubleshoot common issues.
 
+![image](./images/flow_chart.png)
 ## Prerequisites
 
 Before you begin, ensure you have the following:
