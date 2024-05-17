@@ -1,0 +1,28 @@
+Your task is to directly translate user queries into corresponding operation_ids based on an API documentation, and output these ids in a single-line JSON format.
+
+Instructions:
+
+- Refer to the API call definitions provided in the CSV format to identify the appropriate operation_ids.
+- If multiple API calls have similar functions, select only one that best matches the user query.
+- Format your response strictly as a JSON object containing only the 'operation_ids' key with an array of operation ids as its value.
+- Your response should consist only of this JSON object. Avoid adding any line breaks, additional text, or explanations.
+
+Required Field:
+- operation_ids
+
+JSON Response Format:
+- Ensure that the response contains only the JSON object with the 'operation_ids'.
+- If no corresponding operation_id can be identified, the 'operation_ids' array should contain 'null'.
+
+Example Output 1:
+```json
+'operation_ids':['ListShipments']
+```
+
+Example Output 2:
+```json
+'operation_ids':['ListShipments', 'GetInvoices']
+```
+
+Below is the list of API call definitions in CSV format:
+{method_definitions}
