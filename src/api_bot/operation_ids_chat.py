@@ -1,9 +1,11 @@
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_community.llms import Bedrock
+from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts.prompt import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 
-class Chat:
+from api_bot.output_parser import OperationIds
+
+class OperationIdChat:
     _messages = []
     def __init__(
         self,
@@ -18,20 +20,20 @@ class Chat:
             callbacks=[StreamingStdOutCallbackHandler()],
         )
         
-        with open("example_prompt.txt", "w") as f:
-            f.write(template)
-        
         template = template + \
         """
+            {format_instructions}
+            
             Human: {input}
             AI Assistant:
         """
         
-        parser = StrOutputParser()
+        parser = JsonOutputParser(pydantic_object=OperationIds)
         
         prompt = PromptTemplate(
             template=template,
             input_variables=["input"],
+            partial_variables={"format_instructions": parser.get_format_instructions(), "ref": "{{ref}}", "username": "{{username}}"},
         )
         
         self.chain = prompt | model | parser

@@ -96,13 +96,14 @@ class OpenApiParser:
     def __init__(self, openapi_json: dict) -> None:
         self.openapi_json = openapi_json
         self.openapi_parts = OpenApiParts([], [])
+        self.openapi_info = {}
         self.openapi_request = {}
         self.openapi_response = {}
 
     def parse(self) -> OpenApiParts:
         self._parse_paths()
         self._parse_components()
-        return self.openapi_parts, self.openapi_request, self.openapi_response
+        return self.openapi_parts, self.openapi_info, self.openapi_request, self.openapi_response
     
     def _parse_paths(self):
         openapi_data = self.openapi_json
@@ -156,6 +157,12 @@ class OpenApiParser:
                     "summary": operation.get("summary", ""),
                     "security": security
                 })
+                self.openapi_info[operation_id] = {
+                    "path": path,
+                    "method": method.upper(),
+                    "description": operation.get("summary", ""),
+                    "security": security
+                }
                 self.openapi_request[operation_id] = {
                     "parameters": parameter_list,
                     "request_body": request_body_list

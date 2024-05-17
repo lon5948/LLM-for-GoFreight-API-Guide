@@ -1,10 +1,13 @@
+import json
 import os
 
 from api_bot.openapi_parser import OpenApiParser, OpenApiParts
 from api_bot.chat import Chat
 from api_bot.engine import ProcessingEngine
+from api_bot.operation_ids_chat import OperationIdChat
 
 class Agent():
+    operation_id_chat: OperationIdChat
     chat: Chat
     engine: ProcessingEngine
 
@@ -15,18 +18,19 @@ class Agent():
 
     def start(self):
         openapi = self.openapi_json
-        openapi_parts, self.openapi_request, self.openapi_response = OpenApiParser(openapi).parse()
+        openapi_parts, self.openapi_info, self.openapi_request, self.openapi_response = OpenApiParser(openapi).parse()
 
         stage1_prompt = self.get_stage1_prompt(openapi_parts)
+        operation_id_chat = OperationIdChat(template=stage1_prompt)
         
-        chat = Chat(stage1_prompt=stage1_prompt)
-        engine = ProcessingEngine(chat=chat, base_url=self.base_url)
-        self.chat = chat
-        self.engine = engine
+        self.engine1 = ProcessingEngine(chat=operation_id_chat, base_url=self.base_url)
+    
+    def start_next_stage(self, stage2_prompt: str) -> None:
+        chat = Chat(template=stage2_prompt)
+        self.engine2 = ProcessingEngine(chat=chat, base_url=self.base_url)
 
     def get_stage1_prompt(self, openapi_parts: OpenApiParts) -> str:
         method_definitions = openapi_parts.method_definitions.to_csv()
-        security_definitions = openapi_parts.security_definitions.to_csv()
 
         stage1_prompt = ""
         dirname = os.path.dirname(__file__)
@@ -34,42 +38,40 @@ class Agent():
             stage1_prompt = f.read()
 
         stage1_prompt = stage1_prompt.format(
-            method_definitions = method_definitions,
-            security_definitions = security_definitions
+            method_definitions = method_definitions
         )
         return stage1_prompt
     
-    def get_stage2_prompt(self, operation_ids: list) -> str:
-        request_and_response_body = []        
-        for op_id in operation_ids:
-            request = self.openapi_request[op_id]
-            response = self.openapi_response[op_id]
-            request_and_response_body.append({
-                op_id: {
-                    "request": request,
-                    "response": response
-                }
-            })
-
+    def get_stage2_prompt(self) -> str:
         stage2_prompt = ""
         dirname = os.path.dirname(__file__)
         with open(dirname + "/../prompt/stage2_prompt.txt", "r") as f:
             stage2_prompt = f.read()
-
-        stage2_prompt = stage2_prompt.format(
-            request_and_response_body = request_and_response_body
-        )
         return stage2_prompt
     
     def ask(self, question):
-        inp1 = f"Find Operaton ID from OpenAPI documentation.\nUser Query: {question}"
-        operation_id: str = self.engine.ask(inp1)
+        ret: dict = self.engine1.ask(question)
+        if 'operation_ids' not in ret:
+            return "Sorry, can you please provide more information?"
         
-        op_list = operation_id.split(',')
+        stage2_prompt = self.get_stage2_prompt() 
+        self.start_next_stage(stage2_prompt)
         
-        self.get_stage2_prompt(op_list)
-        
-        inp2 = f"Base URL is {self.base_url} and teach user how to finish user query according to API documentation.\nUser Query: {question}"
-        res: str = self.engine.ask(inp2)
-
-        return res
+        responses = ""
+        for order, op_id in enumerate(ret['operation_ids']):
+            
+            if op_id in self.openapi_info:
+                info = self.openapi_info[op_id]
+                path = f'path: {info["path"]}\n' 
+                method = f'method: {info["method"]}\n'
+                description = f'description: {info["description"]}\n'
+                security = f'security: {info["security"]}\n'
+                request = f'request: {self.openapi_request[op_id]}\n'
+                response = f'response: {self.openapi_response[op_id]}\n'
+            
+                inp = "Below is the useful information for the api:\n" + path + method + description + security + request + response
+                resp = self.engine2.ask(inp)
+                responses += f"Step {order+1}:, {resp}\n\n"
+        if responses == "":
+           return "Sorry, I don't have the information for your query."
+        return responses
