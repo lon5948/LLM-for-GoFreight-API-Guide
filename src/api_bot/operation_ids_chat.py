@@ -1,5 +1,5 @@
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain_community.llms import Bedrock
+from langchain_aws import ChatBedrock
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts.prompt import PromptTemplate
 
@@ -10,10 +10,10 @@ class OperationIdChat:
     def __init__(
         self,
         template: str = "You are a helpful AI assistant",
-        model_name: str = "anthropic.claude-v2",
+        model_name: str = "anthropic.claude-3-sonnet-20240229-v1:0",
         region_name: str = "us-west-2",
     ):
-        model = Bedrock(
+        model = ChatBedrock(
             credentials_profile_name="bedrock-admin",
             model_id=model_name,
             region_name=region_name,
