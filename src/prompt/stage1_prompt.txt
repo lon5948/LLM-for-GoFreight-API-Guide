@@ -15,14 +15,10 @@ JSON Response Format:
 - If no corresponding operation_id can be identified, the 'operation_ids' array should contain 'null'.
 
 Example Output 1:
-```json
-'operation_ids':['ListShipments']
-```
+{{{{"operation_ids":["ListShipments"]}}}}
 
 Example Output 2:
-```json
-'operation_ids':['ListShipments', 'GetInvoices']
-```
+{{{{"operation_ids":["ListShipments", "GetInvoices"]}}}}
 
 Below is the list of API call definitions in CSV format:
 {method_definitions}
