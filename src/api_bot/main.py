@@ -41,8 +41,5 @@ def start_api_selector(
     api_selector.start()
     ask_question = api_selector.ask_question
 
-    while True:
-        inp = input(">>> ")
-        if inp == "exit": 
-            break
-        print(ask_question(inp))
+    inp = input(">>> ")
+    print(ask_question(inp))

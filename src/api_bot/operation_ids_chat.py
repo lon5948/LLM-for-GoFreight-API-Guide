@@ -3,7 +3,8 @@ from langchain_aws import ChatBedrock
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.prompts.prompt import PromptTemplate
 
-from api_bot.output_parser import OperationIds
+from api_bot.stage1_parser import OperationIds
+
 
 class OperationIdChat:
     _messages = []

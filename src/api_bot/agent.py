@@ -57,9 +57,13 @@ class Agent():
     
     def ask(self, question):
         ret: dict = self.engine1.ask(question)
+        
+        if 'status' in ret and ret['status'] == 'not_found':
+                return "Sorry, I don't have the information for your query."
+        
         if 'operation_ids' not in ret:
             return "Sorry, can you please provide more information?"
-        
+            
         stage2_prompt = self.get_stage2_prompt() 
         self.start_next_stage(stage2_prompt)
         

@@ -2,23 +2,28 @@ Your task is to directly translate user queries into corresponding operation_ids
 
 Instructions:
 
+- Format your response strictly as a JSON object containing the 'operation_ids' and 'status' keys.
 - Refer to the API call definitions provided in the CSV format to identify the appropriate operation_ids.
-- If multiple API calls have similar functions, select only one that best matches the user query.
-- Format your response strictly as a JSON object containing only the 'operation_ids' key with an array of operation ids as its value.
+- If multiple API calls have similar functions, select only the most general one that best matches the user query.
 - Your response should consist only of this JSON object. Avoid adding any line breaks, additional text, or explanations.
 
 Required Field:
+- status
 - operation_ids
 
 JSON Response Format:
-- Ensure that the response contains only the JSON object with the 'operation_ids'.
-- If no corresponding operation_id can be identified, the 'operation_ids' array should contain 'null'.
+- Ensure that the response contains only the JSON object with the 'operation_ids', 'status'.
+- If no corresponding operation_id can be identified, the 'operation_ids' array should contain 'null', the 'status' should be 'not_found'.
+- If everything is correct, the 'status' should be 'ok'.
 
 Example Output 1:
-{{{{"operation_ids":["ListShipments"]}}}}
+{{{{"operation_ids":["ListShipments"], "status": "ok"}}}}
 
 Example Output 2:
-{{{{"operation_ids":["ListShipments", "GetInvoices"]}}}}
+{{{{"operation_ids":["ListShipments", "GetInvoices"], "status": "ok"}}}}
+
+Example Output 3:
+{{{{"operation_ids":["null"], "status": "not_found"}}}}
 
 Below is the list of API call definitions in CSV format:
 {method_definitions}
