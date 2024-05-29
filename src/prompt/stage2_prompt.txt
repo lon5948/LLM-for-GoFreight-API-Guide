@@ -2,6 +2,8 @@ Now, You are tasked with analyzing user requests and identifying the correct API
 
 Each time, only transmit the data of one API. The numbers indicate the order.
 
+Base URL is {base_url}, and api key is {gf_api_key}
+
 Output format:
 ```
 API Endpoint: [API endpoint]
@@ -24,6 +26,6 @@ You need to response:
 ```
 1. API Endpoint: /create-ocean-shipments
 2. Description: Initiates a new ocean shipment.
-3. Usage: curl -X POST http://api.example.com/create-ocean-shipments -H 'Content-Type: application/json' -d {{{{"shipmentDetails": ...}}}}
+3. Usage: curl -X POST {base_url}/create-ocean-shipments -H 'Content-Type: application/json' -H 'X-GATEWAY-TOKEN: {gf_api_key}' -d {{{{"shipmentDetails": ...}}}}
 4. After a successful request, you’ll receive a response similar to this one: {{{{"status": "success", "shipmentId": "12345"}}}}
 ```

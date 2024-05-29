@@ -18,9 +18,6 @@ class Chat:
             callbacks=[StreamingStdOutCallbackHandler()],
         )
         
-        with open("example_prompt.txt", "w") as f:
-            f.write(template)
-        
         template = template + \
         """
             Human: {input}

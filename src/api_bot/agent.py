@@ -11,8 +11,9 @@ class Agent():
     chat: Chat
     engine: ProcessingEngine
 
-    def __init__(self, base_url: str, openapi_json: dict, model_name: str):
+    def __init__(self, base_url: str, gf_api_key: str, openapi_json: dict, model_name: str):
         self.base_url = base_url
+        self.gf_api_key = gf_api_key
         self.model_name = model_name
         self.openapi_json = openapi_json
 
@@ -23,11 +24,11 @@ class Agent():
         stage1_prompt = self.get_stage1_prompt(openapi_parts)
         operation_id_chat = OperationIdChat(template=stage1_prompt)
         
-        self.engine1 = ProcessingEngine(chat=operation_id_chat, base_url=self.base_url)
+        self.engine1 = ProcessingEngine(chat=operation_id_chat)
     
     def start_next_stage(self, stage2_prompt: str) -> None:
         chat = Chat(template=stage2_prompt)
-        self.engine2 = ProcessingEngine(chat=chat, base_url=self.base_url)
+        self.engine2 = ProcessingEngine(chat=chat)
 
     def get_stage1_prompt(self, openapi_parts: OpenApiParts) -> str:
         method_definitions = openapi_parts.method_definitions.to_csv()
@@ -47,6 +48,11 @@ class Agent():
         dirname = os.path.dirname(__file__)
         with open(dirname + "/../prompt/stage2_prompt.txt", "r") as f:
             stage2_prompt = f.read()
+            
+        stage2_prompt = stage2_prompt.format(
+            base_url = self.base_url,
+            gf_api_key = self.gf_api_key
+        )
         return stage2_prompt
     
     def ask(self, question):
