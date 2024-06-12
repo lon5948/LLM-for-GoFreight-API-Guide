@@ -11,7 +11,7 @@ Before you begin, ensure you have the following:
 
 - Python 3.11 or higher installed on your system.
 - an `openapi.json` file you wish to analyze.
-- An API key from OpenAI or AWS Bedrock.
+- An API key from AWS Bedrock.
 
 ## Installation
 
@@ -25,18 +25,12 @@ poetry install
 
 ## Run
 
-To run the LLM-for-GoFreight-API-Guide tool, you need to configure it with (your OpenAI key), the path to your openapi.json file, and your API's base URL.
+To run the LLM-for-GoFreight-API-Guide tool, you need to configure it with gofreight api key, the path to your openapi.json file, and your website's base URL.
 
 Run the tool using the following command:
 
-- openai version
 ```bash
-python api_selector.py --openai-key <your-openai-key> --openapi-json <openapi-json-path> --base-url <your-base-url>
-```
-
-- aws bedrock version
-```bash
-python api_selector.py --openapi-json <openapi-json-path> --base-url <your-base-url>
+python3 api_selector.py --openapi-json <openapi-json-path> --base-url <your-website-base-url> --gf_api_key <your-gofreight-api-key>
 ```
   
 
@@ -57,7 +51,7 @@ The `main.py` file contains the `ApiSelector` class, which is responsible for AP
 Within `engine.py`, the `ProcessingEngine` class is defined. This class is tasked with the processing of user queries. It formulates the requests to the language model and interprets the responses to provide answers.
 
 #### Chat Interface Handler (`chat.py`)
-The `chat.py` file manages the chat interface. It is in charge of storing the conversation history and sending requests to the OpenAI or AWS Bedrock API. 
+The `chat.py` file manages the chat interface. It is in charge of storing the conversation history and sending requests to the AWS Bedrock API. 
 
 #### Component Orchestrator (`agent.py`)
 `agent.py` acts as the orchestrator for all the separate components. It is responsible for loading the system and user prompts and starting the chat and processing engines.
