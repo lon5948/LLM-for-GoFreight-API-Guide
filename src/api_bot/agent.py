@@ -1,5 +1,5 @@
-import json
 import os
+import subprocess
 
 from api_bot.openapi_parser import OpenApiParser, OpenApiParts
 from api_bot.chat import Chat
@@ -57,14 +57,19 @@ class Agent():
     
     def ask(self, question):
         ret: dict = self.engine1.ask(question)
+        
+        if 'status' in ret and ret['status'] == 'not_found':
+            return "Sorry, I don't have the information for your query."
+        
         if 'operation_ids' not in ret:
             return "Sorry, can you please provide more information?"
-        
+            
         stage2_prompt = self.get_stage2_prompt() 
         self.start_next_stage(stage2_prompt)
         
         responses = ""
-        for order, op_id in enumerate(ret['operation_ids']):
+        step = 1
+        for op_id in ret['operation_ids']:
             
             if op_id in self.openapi_info:
                 info = self.openapi_info[op_id]
@@ -75,9 +80,26 @@ class Agent():
                 request = f'request: {self.openapi_request[op_id]}\n'
                 response = f'response: {self.openapi_response[op_id]}\n'
             
-                inp = "Below is the useful information for the api:\n" + path + method + description + security + request + response
+                inp = f"User Query: {question}\n\nBelow is the useful information for the api:\npath: {path}\nmethod: {method}\ndescription: {description}\nsecurity: {security}\nrequest body: {request}\nresponse body: {response}"
+                
                 resp = self.engine2.ask(inp)
-                responses += f"Step {order+1}:, {resp}\n\n"
+                
+                if 'status' in resp and resp['status'] == 'lack_of_info':
+                    if 'description' in resp:
+                        return resp['description']
+                    return "Sorry, You need to provide me more information."
+                
+                if 'curl_command' in resp:
+                    result = subprocess.run(resp['curl_command'], shell=True, capture_output=True, text=True)
+                    if result.returncode == 0:
+                        result = result.stdout
+                    else:
+                        result = "Below is expeted response:\n" + str(resp['expected_response'])
+                
+                responses += f"""Step {step}:\nEndpoint: {resp['endpoint']}\nDescription: {resp['description']}\nCurl Command:\n{resp['curl_command']}\nResponse:\n{result}\n"""
+                step += 1
+
         if responses == "":
            return "Sorry, I don't have the information for your query."
+
         return responses
