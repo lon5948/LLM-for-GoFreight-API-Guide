@@ -13,6 +13,14 @@ Before you begin, ensure you have the following:
 - an `openapi.json` file you wish to analyze.
 - An API key from AWS Bedrock.
 
+## Mock Server
+Use the following command to launch the mock server:
+
+```bash
+$ npm install @stoplight/prism-cli
+$ npx prism mock api-spec.yaml
+```
+
 ## Installation
 
 Ensure you have Poetry installed on your system. If you do not have Poetry installed, you can install it by following the instructions at the [Poetry documentation](https://python-poetry.org/docs/).
