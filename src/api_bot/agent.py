@@ -92,6 +92,8 @@ class Agent():
                 if 'curl_command' in resp:
                     result = subprocess.run(resp['curl_command'], shell=True, capture_output=True, text=True)
                     if result.returncode == 0:
+                        result = result.stdout
+                    else:
                         result = "Below is expeted response:\n" + str(resp['expected_response'])
                 
                 responses += f"""Step {step}:\nEndpoint: {resp['endpoint']}\nDescription: {resp['description']}\nCurl Command:\n{resp['curl_command']}\nResponse:\n{result}\n"""
