@@ -1,8 +1,9 @@
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_aws import ChatBedrock
 from langchain.prompts.prompt import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import JsonOutputParser
 
+from api_bot.stage2_parser import Instructions
 class Chat:
     _messages = []
     def __init__(
@@ -24,7 +25,7 @@ class Chat:
             AI Assistant:
         """
         
-        parser = StrOutputParser()
+        parser = JsonOutputParser(pydantic_object=Instructions)
         
         prompt = PromptTemplate(
             template=template,
